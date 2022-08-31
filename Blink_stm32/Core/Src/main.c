@@ -19,12 +19,41 @@ int main(void){
 
 	while (1){
 //		blink_standart_gpio();
-//		blink_flag_gpio();
+		blink_flag_gpio();
 	}
 }
 
-void SystemClock_Config(void)
-{
+static void blink_standart_gpio(void){
+	HAL_GPIO_WritePin(GPIOC, Led_Pin, 0);
+	HAL_Delay(2000);
+
+	HAL_GPIO_WritePin(GPIOC, Led_Pin, 1);
+	HAL_Delay(2000);
+}
+
+static void blink_flag_gpio(void){
+	if(flag == 1){
+		if(HAL_GetTick() - T >= 2000){
+			flag = 0;
+			T = HAL_GetTick();
+		}
+	}
+	if(flag == 0){
+		if(HAL_GetTick() - T >= 2000){
+			flag = 1;
+			T = HAL_GetTick();
+		}
+	}
+//	HAL_GPIO_WritePin(GPIOC, Led_Pin, flag);
+	if(flag){
+		GPIOC -> BSRR = (uint32_t)Led_Pin << 16;
+	} else if(!flag){
+		GPIOC -> BSRR = (uint32_t)Led_Pin;
+	}
+
+}
+
+void SystemClock_Config(void){
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
@@ -58,8 +87,7 @@ void SystemClock_Config(void)
   }
 }
 
-static void MX_GPIO_Init(void)
-{
+static void MX_GPIO_Init(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
@@ -79,8 +107,7 @@ static void MX_GPIO_Init(void)
 
 }
 
-void Error_Handler(void)
-{
+void Error_Handler(void){
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
@@ -88,30 +115,6 @@ void Error_Handler(void)
   {
   }
   /* USER CODE END Error_Handler_Debug */
-}
-
-static void blink_standart_gpio(void){
-	HAL_GPIO_WritePin(GPIOC, Led_Pin, 0);
-	HAL_Delay(2000);
-
-	HAL_GPIO_WritePin(GPIOC, Led_Pin, 1);
-	HAL_Delay(2000);
-}
-
-static void blink_flag_gpio(void){
-	if(flag == 1){
-		if(HAL_GetTick() - T >= 2000){
-			flag = 0;
-			T = HAL_GetTick();
-		}
-	}
-	if(flag == 0){
-		if(HAL_GetTick() - T >= 2000){
-			flag = 1;
-			T = HAL_GetTick();
-		}
-	}
-	HAL_GPIO_WritePin(GPIOC, Led_Pin, flag);
 }
 
 #ifdef  USE_FULL_ASSERT
